@@ -17,12 +17,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #import "RealmReact.h"
-#import "RealmAnalytics.h"
 
-#import "jsc/jsc_init.h"
-
-#import "impl/realm_coordinator.hpp"
-#import "shared_realm.hpp"
+#import <realm-js-ios/jsc_init.h>
 
 #import <React/RCTBridge+Private.h>
 #import <React/RCTJavaScriptExecutor.h>
@@ -34,11 +30,11 @@
 #import <net/if.h>
 
 #if DEBUG
+#include <realm-js-ios/rpc.hpp>
 #import "GCDWebServer.h"
 #import "GCDWebServerDataRequest.h"
 #import "GCDWebServerDataResponse.h"
 #import "GCDWebServerErrorResponse.h"
-#import "rpc.hpp"
 
 #define WEB_SERVER_PORT 8083
 
@@ -72,7 +68,7 @@ extern "C" JSGlobalContextRef RealmReactGetJSGlobalContextForExecutor(id executo
         }
         else {
             // for RN < 0.28.0
-            assert([RCTJavaScriptContext instancesRespondToSelector:@selector(initWithJSContext:)]);
+            NSCAssert([RCTJavaScriptContext instancesRespondToSelector:@selector(initWithJSContext:)], @"React Native version too old");
             rctJSContext = [[RCTJavaScriptContext alloc] initWithJSContext:[JSContext new]];
         }
 
@@ -106,8 +102,6 @@ RCT_EXPORT_MODULE(Realm)
     if (self != [RealmReact class]) {
         return;
     }
-
-    RLMSendAnalytics();
 }
 
 - (instancetype)init {
@@ -208,7 +202,7 @@ RCT_REMAP_METHOD(emit, emitEvent:(NSString *)eventName withObject:(id)object) {
 
         [ipAddresses addObject:@(host)];
     }
-    
+
     freeifaddrs(ifaddrs);
     return [ipAddresses copy];
 }
@@ -231,8 +225,8 @@ RCT_REMAP_METHOD(emit, emitEvent:(NSString *)eventName withObject:(id)object) {
             NSData *responseData;
 
             if (rpcServer) {
-                json args = json::parse([[(GCDWebServerDataRequest *)request text] UTF8String]);
-                std::string responseText = rpcServer->perform_request(request.path.UTF8String, std::move(args)).dump();
+                std::string args = [[(GCDWebServerDataRequest *)request text] UTF8String];
+                std::string responseText = rpcServer->perform_request(request.path.UTF8String, args);
 
                 responseData = [NSData dataWithBytes:responseText.c_str() length:responseText.length()];
             }
@@ -267,6 +261,7 @@ RCT_REMAP_METHOD(emit, emitEvent:(NSString *)eventName withObject:(id)object) {
 #endif
 
 - (void)invalidate {
+    RJSInvalidateCaches();
 #if DEBUG
     // shutdown rpc if in chrome debug mode
     [self shutdownRPC];
@@ -286,9 +281,6 @@ void _initializeOnJSThread(JSContextRefExtractor jsContextExtractor) {
         [NSThread sleepForTimeInterval:0.1];
     }
     s_currentJSThread = [NSThread currentThread];
-
-    // Close all cached Realms from the previous JS thread.
-    realm::_impl::RealmCoordinator::clear_all_caches();
 
     RJSInitializeInContext(jsContextExtractor());
 }

@@ -22,18 +22,24 @@
 #include "js_types.hpp"
 #include "js_observable.hpp"
 
-#include "collection_notifications.hpp"
-#if REALM_ENABLE_SYNC
-#include "sync/subscription_state.hpp"
-#endif
+#include <realm/object-store/collection_notifications.hpp>
+#include <realm/object-store/object.hpp>
+#include <realm/object-store/object_changeset.hpp>
 
 namespace realm {
 namespace js {
 
-// Empty class that merely serves as useful type for now.
-class Collection {};
+template <typename T>
+class RealmObject;
 
-template<typename T>
+template <typename T>
+struct RealmObjectClass;
+
+// Empty class that merely serves as useful type for now.
+class Collection {
+};
+
+template <typename T>
 struct CollectionClass : ClassDefinition<T, Collection, ObservableClass<T>> {
     using ContextType = typename T::Context;
     using ValueType = typename T::Value;
@@ -43,11 +49,58 @@ struct CollectionClass : ClassDefinition<T, Collection, ObservableClass<T>> {
 
     std::string const name = "Collection";
 
-    static inline ValueType create_collection_change_set(ContextType ctx, const CollectionChangeSet &change_set);
+    static inline ValueType create_collection_change_set(ContextType ctx, StringData object_type,
+                                                         const ObjectChangeSet& change_set,
+                                                         realm::SharedRealm old_realm, realm::SharedRealm new_realm);
+    static inline ValueType create_collection_change_set(ContextType ctx, const CollectionChangeSet& change_set);
 };
 
-template<typename T>
-typename T::Value CollectionClass<T>::create_collection_change_set(ContextType ctx, const CollectionChangeSet &change_set)
+template <typename T>
+typename T::Value CollectionClass<T>::create_collection_change_set(ContextType ctx, StringData object_type,
+                                                                   const ObjectChangeSet& change_set,
+                                                                   realm::SharedRealm old_realm,
+                                                                   realm::SharedRealm new_realm)
+{
+    ObjectType object = Object::create_empty(ctx);
+    std::vector<ValueType> scratch;
+
+    auto make_object_array = [&](auto const& keys, auto realm) {
+        scratch.clear();
+        scratch.reserve(keys.size());
+        for (auto key : keys) {
+            auto realm_object = realm::Object(realm, object_type, realm::ObjKey(key));
+            auto obj = RealmObjectClass<T>::create_instance(ctx, realm_object);
+            scratch.push_back(obj);
+        }
+        return Object::create_array(ctx, scratch);
+    };
+
+    auto make_object_array_from_modifications = [&](auto const& keys, auto realm) {
+        scratch.clear();
+        scratch.reserve(keys.size());
+        for (auto key : keys) {
+            auto realm_object = realm::Object(realm, object_type, realm::ObjKey(key.first));
+            auto obj = RealmObjectClass<T>::create_instance(ctx, realm_object);
+            scratch.push_back(obj);
+        }
+        return Object::create_array(ctx, scratch);
+    };
+
+    Object::set_property(ctx, object, "deletions", make_object_array(change_set.get_deletions(), old_realm));
+    Object::set_property(ctx, object, "insertions", make_object_array(change_set.get_insertions(), new_realm));
+
+    auto old_modifications = make_object_array_from_modifications(change_set.get_modifications(), old_realm);
+    Object::set_property(ctx, object, "oldModifications", old_modifications);
+
+    auto new_modifications = make_object_array_from_modifications(change_set.get_modifications(), new_realm);
+    Object::set_property(ctx, object, "newModifications", new_modifications);
+
+    return object;
+}
+
+template <typename T>
+typename T::Value CollectionClass<T>::create_collection_change_set(ContextType ctx,
+                                                                   const CollectionChangeSet& change_set)
 {
     ObjectType object = Object::create_empty(ctx);
     std::vector<ValueType> scratch;
@@ -76,5 +129,5 @@ typename T::Value CollectionClass<T>::create_collection_change_set(ContextType c
     return object;
 }
 
-} // js
-} // realm
+} // namespace js
+} // namespace realm

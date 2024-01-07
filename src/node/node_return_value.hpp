@@ -19,72 +19,105 @@
 #pragma once
 
 #include "node_types.hpp"
+#include "napi.h"
 
 namespace realm {
 namespace js {
 
-template<>
+template <>
 class ReturnValue<node::Types> {
-    Nan::ReturnValue<v8::Value> m_value;
+    Napi::Env m_env;
+    Napi::Value m_value;
 
-  public:
-    ReturnValue(Nan::ReturnValue<v8::Value> value) : m_value(value) {}
-    ReturnValue(v8::ReturnValue<v8::Value> value) : m_value(value) {}
+public:
+    ReturnValue(Napi::Env env)
+        : m_env(env)
+        , m_value(Napi::Value(env, env.Undefined()))
+    {
+    }
+    ReturnValue(Napi::Env env, Napi::Value value)
+        : m_env(env)
+        , m_value(value)
+    {
+    }
 
-    void set(const v8::Local<v8::Value> &value) {
-        m_value.Set(value);
-    }
-    void set(const std::string &string) {
-        if (string.empty()) {
-            m_value.SetEmptyString();
+    Napi::Value ToValue()
+    {
+        // guard check. env.Empty() values cause node to fail in obscure places, so return undefined instead
+        if (m_value.IsEmpty()) {
+            return Napi::Value(m_env, m_env.Undefined());
         }
-        else {
-            m_value.Set(Nan::New(string).ToLocalChecked());
-        }
+
+        return m_value;
     }
-    void set(const char *str) {
+
+    void set(const Napi::Value& value)
+    {
+        m_value = Napi::Value(m_env, value);
+    }
+
+    void set(const std::string& string)
+    {
+        m_value = Napi::Value::From(m_env, string);
+    }
+
+    void set(const char* str)
+    {
         if (!str) {
-            m_value.SetNull();
-        }
-        else if (!*str) {
-            m_value.SetEmptyString();
+            m_value = Napi::Value(m_env, m_env.Null());
         }
         else {
-            m_value.Set(Nan::New(str).ToLocalChecked());
+            m_value = Napi::Value::From(m_env, str);
         }
     }
-    void set(bool boolean) {
-        m_value.Set(boolean);
-    }
-    void set(double number) {
-        m_value.Set(number);
-    }
-    void set(int32_t number) {
-        m_value.Set(number);
-    }
-    void set(uint32_t number) {
-        m_value.Set(number);
-    }
-    void set(realm::Mixed mixed) {
-        m_value.Set(Value<node::Types>::from_mixed(nullptr, mixed));
-    }
-    void set_null() {
-        m_value.SetNull();
-    }
-    void set_undefined() {
-        m_value.SetUndefined();
+
+    void set(bool boolean)
+    {
+        m_value = Napi::Value::From(m_env, boolean);
     }
 
-    template<typename T>
-    void set(util::Optional<T> value) {
+    void set(double number)
+    {
+        m_value = Napi::Value::From(m_env, number);
+    }
+
+    void set(int32_t number)
+    {
+        m_value = Napi::Value::From(m_env, number);
+    }
+
+    void set(uint32_t number)
+    {
+        m_value = Napi::Value::From(m_env, number);
+    }
+
+    void set(realm::Mixed mixed)
+    {
+        m_value = Value<node::Types>::from_mixed(m_env, nullptr, mixed);
+    }
+
+    void set_null()
+    {
+        m_value = Napi::Value(m_env, m_env.Null());
+    }
+
+
+    void set_undefined()
+    {
+        m_value = Napi::Value(m_env, m_env.Undefined());
+    }
+
+    template <typename T>
+    void set(util::Optional<T> value)
+    {
         if (value) {
             set(*value);
         }
         else {
-            m_value.SetUndefined();
+            set_undefined();
         }
     }
 };
-    
-} // js
-} // realm
+
+} // namespace js
+} // namespace realm

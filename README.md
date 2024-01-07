@@ -1,205 +1,97 @@
-<<<<<<< HEAD
-# realm
-=======
-![Realm](https://github.com/realm/realm-js/raw/master/logo.png)
+[![realm by MongoDB](./logo.svg#gh-light-mode-only)](https://realm.io#gh-light-mode-only)
+[![realm by MongoDB](./logo-dark.svg#gh-dark-mode-only)](https://realm.io#gh-dark-mode-only)
 
 Realm is a mobile database that runs directly inside phones, tablets or wearables.
-This project hosts the JavaScript versions of [Realm](https://realm.io/). Currently we only support React Native (both iOS & Android) and Node.js (on MacOS and Linux) but we are considering adding support for Cordova/PhoneGap/Ionic as well.
+This project hosts the JavaScript versions of [Realm](https://realm.io/). Currently we support React Native (both iOS & Android), Node.js and Electron (on Windows, MacOS and Linux).
 
 ## Features
 
 * **Mobile-first:** Realm is the first database built from the ground up to run directly inside phones, tablets and wearables.
-* **Simple:** Data is directly [exposed as objects](https://realm.io/docs/javascript/latest/#models) and [queryable by code](https://realm.io/docs/javascript/latest/#queries), removing the need for ORM's riddled with performance & maintenance issues.
+* **Simple:** Data is directly [exposed as objects](https://docs.mongodb.com/realm/node/realms/) and [queryable by code](https://docs.mongodb.com/realm/node/query-engine/), removing the need for ORM's riddled with performance & maintenance issues.
 * **Modern:** Realm supports relationships, generics, and vectorization.
 * **Fast:** Realm is faster than even raw SQLite on common operations, while maintaining an extremely rich feature set.
 
 ## Getting Started
 
-Please see the detailed instructions in our docs to use [Realm Javascript](https://realm.io/docs/javascript/latest/#getting-started).
-
+Please see the detailed instructions in our docs to use [Realm JavaScript for Node.js](https://docs.mongodb.com/realm/sdk/node/) and [Realm JavaScript for React Native](https://docs.mongodb.com/realm/sdk/react-native/). Please notice that currently only Node.js version 10 or later (excluding 11) are supported.
 ## Documentation
 
 ### Realm React Native and Node.js
 
-The documentation can be found at [realm.io/docs/javascript/latest/](https://realm.io/docs/javascript/latest/).
-The API reference is located at [realm.io/docs/javascript/latest/api/](https://realm.io/docs/javascript/latest/api/).
+The documentation for the Realm React Native SDK can be found at [docs.mongodb.com/realm/sdk/react-native/](https://docs.mongodb.com/realm/sdk/react-native/). The documentation for Realm Node.js SDK can be found at [docs.mongodb.com/realm/sdk/node](https://docs.mongodb.com/realm/sdk/node/).
 
+The API reference is located at [docs.mongodb.com/realm-sdks/js/latest/](https://docs.mongodb.com/realm-sdks/js/latest/).
+
+If you are using React Native, please also take a look the README for [@realm/react](https://github.com/realm/realm-js/tree/master/packages/realm-react#readme), which provides React hooks to make working with Realm easier.
+
+
+## Template apps using Expo for React Native
+
+We have TypeScript and JavaScript templates to help you get started using Realm.  Follow the links to your desired template and follow the instructions there to get up and running fast.
+### Using Expo
+
+- [TypeScript](https://github.com/realm/realm-js/tree/master/templates/expo-template-ts#readme)
+- [JavaScript](https://github.com/realm/realm-js/tree/master/templates/expo-template-js#readme)
+
+### React Native
+
+- [TypeScript](https://github.com/realm/realm-js/tree/master/templates/react-native-template-realm-ts#readme)
+- [JavaScript](https://github.com/realm/realm-js/tree/master/templates/react-native-template-realm-js#readme)
 ## Getting Help
 
-* **Need help with your code?**: Look for previous questions on the  [#realm tag](https://stackoverflow.com/questions/tagged/realm?sort=newest) — or [ask a new question](https://stackoverflow.com/questions/ask?tags=realm). We actively monitor and answer questions on SO!
+* **Need help with your code?**: Look for previous questions on the  [#realm tag](https://stackoverflow.com/questions/tagged/realm?sort=newest) — or [ask a new question](https://stackoverflow.com/questions/ask?tags=realm). You can also check out our [Community Forum](https://developer.mongodb.com/community/forums/tags/c/realm/9/realm-sdk) where general questions about how to do something can be discussed.
 * **Have a bug to report?** [Open an issue](https://github.com/realm/realm-js/issues/new). If possible, include the version of Realm, a full log, the Realm file, and a project that shows the issue.
 * **Have a feature request?** [Open an issue](https://github.com/realm/realm-js/issues/new). Tell us what the feature should do, and why you want the feature.
-* Sign up for our [**Community Newsletter**](https://go.pardot.com/l/210132/2017-04-26/3j74l) to get regular tips, learn about other use-cases and get alerted of blog posts and tutorials about Realm.
 
-## Building Realm
+## Known issues
 
-In case you don't want to use the precompiled version on npm, you can build Realm yourself from source. You’ll need an Internet connection the first time you build in order to download the core library.
+* Realm is not compatible with the Chrome Debugger.  The following debugging methods are supported.
+   * [Flipper](https://fbflipper.com/) has many similar features in relation to the Chrome Debugger. Please consider trying out our [Hermes release](https://github.com/realm/realm-js/issues/3940) to use the Hermes Debugger in Flipper and set breakpoints in your code.
+   * [Safari](https://reactnative.dev/docs/debugging#safari-developer-tools) also has a similar feature set, but requires [some setup](https://blog.nparashuram.com/2019/10/debugging-react-native-ios-apps-with.html) and only supports debugging in iOS.
+   * **NOTE:** For the above methods, it is not neccessary to enable `Debug with Chrome` in the Debug Menu.
 
-Prerequisites:
-* Xcode 7.2+
-* nodejs
-* nvm (on Mac)
-* cocoapods (on Mac)
-* Android SDK 23+
-* [Android NDK 10e](https://developer.android.com/ndk/downloads/older_releases)
+## Building Realm JS
 
-Clone RealmJS repository:
-
-```
-git clone https://github.com/realm/realm-js.git
-cd realm-js
-git submodule update --init --recursive
-```
-
-Note: On Windows the RealmJS repo should be cloned with symlinks enabled 
-```
-#run in elevated command prompt
-git clone -c core.symlinks=true https://github.com/realm/realm-js
-```
-
-or manually create the symlinks using directory junctions if you already have the repo cloned.
-```
-#run in elevated command prompt
-cd realm-js\react-native\android\src\main\jni
-#remove src and vendor files
-del src
-del vendor
-mklink /j "src" "../../../../../src/"
-mklink /j "vendor" "../../../../../vendor"
-cd realm-js\tests\react-test-app\android\app\src\main
-#remove assets file
-del assets
-mklink /j assets "../../../../../data"
-```
-
-Note: If you have cloned the repo previously make sure you remove your node_modules directory since it may contain stale dependencies which may cause the build to fail.
-
-### Building for iOS:
-* Open `react-native/ios/RealmReact.xcodeproj` in Xcode
-* Select `RealmReact` under `Targets`
-* Build: `⌘ + B`
-
-### Building for Android:
-* `cd react-native/android`
-* `./gradlew publishAndroid`
-* The compiled version of the Android module is here: `<project-root>/android`
-
-### Building for nodejs:
-Be sure you have python2.7 as the default python. 3.x won't work, and it's not enough to use `--python=python2.7` as parameter to npm.
-For example you can use Homebrew to install it.
-```
-brew install python@2
-```
-
-```
-npm install --build-from-source=realm
-```
-
-#### Additional steps for Windows
-On Windows you will need to setup the environment for node-gyp:
-
-* Option 1: Install windows-build-tools node package
-
-    ```
-    # run in elevated command prompt (as Administrator)
-    npm install -g --production windows-build-tools --vs201
-    ```
-
-* Option 2: Manually install and configure as described in the [node-gyp](https://github.com/nodejs/node-gyp) manual.
-
-You also need to install openssl libraries with vcpkg:
-
-```
-git clone https://github.com/Microsoft/vcpkg
-cd vcpkg
-bootstrap-vcpkg.bat
-vcpkg install openssl:x64-windows-static
-mkdir C:\src\vcpkg\installed\x64-windows-static\lib
-copy .\packages\openssl-windows_x64-windows-static\lib\libeay32.lib C:\src\vcpkg\installed\x64-windows-static\lib\
-copy .\packages\openssl-windows_x64-windows-static\lib\ssleay32.lib C:\src\vcpkg\installed\x64-windows-static\lib
-```
-
-### Building docs
-API documentation is written using [JSDoc](http://usejsdoc.org/).
-
-* `npm run jsdoc`
-
-The generated docs can be found by opening `docs/output/realm/<version>/index.html`.
-
-## Debugging the node addon
-
-You can use [Visual Studio Code](https://code.visualstudio.com/) to develop and debug. In the `.vscode` folder, configuration for building and debugging has been added for your convience.
-
-VSCode has good support for debugging JavaScript, but to work with C++ code, you are required to install two additional VSCode extensions:
-
-* Microsoft C/C++
-* CodeLLDB
-
-To begin, you will need to build the node addon and prepare the test environment:
-```
-npm install --build-from-source --debug
-(cd tests && npm install)
-```
-
-Prior to begin debugging, you must start Realm Object Server. In VSCode, under menu *Tasks*/*Run Task*, find *Download and Start Server*.
-
-In the debugging pane, you can find `Debug LLDB + NodeJS` in the dropdown. First select *Start Debugging* in the *Debug* menu.
+For instructions on building Realm JS yourself from source, see the [building.md](contrib/building.md) file.
 
 ## Issues with debugging
 Some users have reported the Chrome debugging being too slow to use after integrating Realm into their react-native project. This is due to the blocking nature of the RPC calls made through the Realm library. See https://github.com/realm/realm-js/issues/491 for more information. The best workaround is to use Safari instead, as a user has described [here](https://github.com/realm/realm-js/issues/491#issuecomment-404670910).
 
-## Running the tests
+Moreover, we have a switch to [Flipper](https://fbflipper.com/) in the works as part of our effort to [support Hermes](https://github.com/realm/realm-js/pull/3792). It implies that we envision a near future where the Chrome debugging will be removed, and we currently don't invest much in its maintenance.
 
-The tests will spawn a new shell when running, so you need to make sure that new shell instances use the correct version of `npm`. On Mac you can use Homebrew and you can add the following to your prefered shell setup:
+## Analytics
 
-```
-export NVM_DIR="$HOME/.nvm"
-. "$(brew --prefix nvm)/nvm.sh"
-```
+Asynchronously submits install information to Realm.
 
-Install cocoapods
-```
-sudo gem install cocoapods
-```
+Why are we doing this? In short, because it helps us build a better product
+for you. None of the data personally identifies you, your employer or your
+app, but it *will* help us understand what language you use, what Node.js
+versions you target, etc. Having this info will help prioritizing our time,
+adding new features and deprecating old features. Collecting an anonymized
+application path & anonymized machine identifier is the only way for us to
+count actual usage of the other metrics accurately. If we don’t have a way to
+deduplicate the info reported, it will be useless, as a single developer
+`npm install`-ing the same app 10 times would report 10 times more than another
+developer that only installs once, making the data all but useless.
+No one likes sharing data unless it’s necessary, we get it, and we’ve
+debated adding this for a long long time. If you truly, absolutely
+feel compelled to not send this data back to Realm, then you can set an env
+variable named `REALM_DISABLE_ANALYTICS`.
 
-You can now use `scripts/test.sh` to run the various tests.
-You will need yarn installed on the machine.
+Currently the following information is reported:
 
-`test.sh` options
-
- * eslint - lints the sources
- * react-tests - runs all React Native tests on iOS Simulator
- * react-tests-android runs all React Native Android tests on Android emulator
- * node - runs all tests for node
- * test-runners - checks supported tests runners are working correctly
-
-If you modify or add a test, please remove `tests/react-test-app/node_modules/realm-tests` before running `test.sh` (of course, only if you are testing with React Native).
-
-### Testing on Windows
-
-On Windows some of these targets are available as npm commands.
-```
-npm run eslint
-npm run node-tests
-npm run test-runners
-```
-
-## Debugging the tests
-
-You can attach a debugger to react-native tests by passing "Debug" to the `test.sh` script. A Chrome browser will open and connect to the react native application. Use the built-in Chrome Debugger to debug the code.
-
-```
-./scripts/tests.sh react-tests Debug
-```
-
-Using Visual Studio Code
-
-You can debug node tests using Visual Studio Code. Just use one of the launch configurations.
+ * What version of Realm is being installed.
+ * The OS platform and version which is being used.
+ * If a JavaScript framework (currently React Native and Electron) is used and its version.
+ * Which JavaScript engine is being used.
+ * Node.js version number.
+ * An anonymous machine identifier and hashed application path to aggregate the other information on.
 
 ## Code of Conduct
 
-This project adheres to the Contributor Covenant [code of conduct](https://realm.io/conduct/).
-By participating, you are expected to uphold this code. Please report unacceptable behavior to [info@realm.io](mailto:info+conduct@realm.io).
+This project adheres to the [MongoDB Code of Conduct](https://www.mongodb.com/community-code-of-conduct).
+By participating, you are expected to uphold this code. Please report
+unacceptable behavior to [community-conduct@mongodb.com](mailto:community-conduct@mongodb.com).
 
 ## Contributing
 
@@ -207,9 +99,7 @@ See [CONTRIBUTING.md](https://github.com/realm/realm-js/blob/master/CONTRIBUTING
 
 ## License
 
-Realm JS is published under a mix of the Apache License 2.0 and the Realm Platform Extensions License.
-Realm Core is published under the Apache 2.0 license and is available
-[here](https://github.com/realm/realm-core).
+Realm JS and [Realm Core](https://github.com/realm/realm-core) are published under the Apache License 2.0.
 
 **This product is not being made available to any person located in Cuba, Iran,
 North Korea, Sudan, Syria or the Crimea region, or to any other person that is
@@ -221,5 +111,4 @@ not eligible to receive the product under U.S. law.**
 
 **_And if you don't like it, please let us know what you would like improved, so we can fix it!_**
 
-![analytics](https://ga-beacon.appspot.com/UA-50247013-2/realm-js/README?pixel)
->>>>>>> 448bbab (Init)
+<img style="width: 0px; height: 0px;" src="https://3eaz4mshcd.execute-api.us-east-1.amazonaws.com/prod?s=https://github.com/realm/realm-js/#README.md">

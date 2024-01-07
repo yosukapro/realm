@@ -20,38 +20,62 @@
 
 #include "node_types.hpp"
 
+#include "napi.h"
+
 namespace realm {
 namespace js {
 
-template<>
+template <>
 class String<node::Types> {
+    using StringType = String<node::Types>;
+
     std::string m_str;
 
-  public:
-    String(const char* s) : m_str(s) {}
-    String(const std::string &s) : m_str(s) {}
-    String(const v8::Local<v8::String> &s);
-    String(v8::Local<v8::String> &&s) : String(s) {}
+public:
+    static bson::Bson to_bson(StringType stringified_ejson)
+    {
+        return bson::parse(std::string(stringified_ejson));
+    }
 
-    operator std::string() const& {
+    static std::string from_bson(const bson::Bson& bson)
+    {
+        return bson.to_string();
+    }
+
+    String(const char* s)
+        : m_str(s)
+    {
+    }
+    String(const std::string& s)
+        : m_str(s)
+    {
+    }
+    String(const Napi::String& s);
+    String(Napi::String&& s)
+        : String(s)
+    {
+    }
+
+    operator std::string() const&
+    {
         return m_str;
     }
-    operator std::string() && {
+
+    operator std::string() &&
+    {
         return std::move(m_str);
     }
-    operator v8::Local<v8::String>() const {
-        return Nan::New(m_str).ToLocalChecked();
+
+    Napi::String ToString(Napi::Env env)
+    {
+        return Napi::String::New(env, m_str);
     }
 };
 
-inline String<node::Types>::String(const v8::Local<v8::String> &s) {
-    if (s.IsEmpty() || s->Length() == 0) {
-        return;
-    }
-    m_str.resize(s->Utf8Length());
-    const int flags = v8::String::NO_NULL_TERMINATION | v8::String::REPLACE_INVALID_UTF8;
-    s->WriteUtf8(&m_str[0], m_str.size(), 0, flags);
+inline String<node::Types>::String(const Napi::String& s)
+{
+    m_str = s.Utf8Value();
 }
 
-} // js
-} // realm
+} // namespace js
+} // namespace realm
