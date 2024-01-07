@@ -1,0 +1,12 @@
+io/realm/react/util/SSLHelper.java
+ io.realm.react.util.SSLHelper
+io/realm/react/Version.java
+ io.realm.react.Version
+io/realm/react/RealmReactPackage.java
+ io.realm.react.RealmReactPackage
+io/realm/react/RealmReactModule.java
+ io.realm.react.RealmReactModule
+ io.realm.react.RealmReactModule$1
+ io.realm.react.RealmReactModule$AndroidWebServer
+io/realm/react/BuildConfig.java
+ io.realm.react.BuildConfig
